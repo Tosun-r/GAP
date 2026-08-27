@@ -1,5 +1,11 @@
 import argparse
-import random
+#import random
+
+import time
+
+from gap.scheduler import startup_delay, regular_delay
+from gap.selector import select_quote
+from gap.history import remember_quote
 
 from gap.repository import load_quotes
 from gap.state import (
@@ -24,12 +30,14 @@ def print_quote(quote: dict) -> None:
 
 def command_now() -> None:
     quotes = load_quotes()
+    quote = select_quote(quotes)
 
-    if not quotes:
+    if quote is None:
         print("Aucune citation disponible.")
         return
 
-    print_quote(random.choice(quotes))
+    print_quote(quote)
+    remember_quote(quote["id"])
 
 
 def command_hook() -> None:
@@ -44,12 +52,30 @@ def command_hook() -> None:
 
 def command_queue() -> None:
     quotes = load_quotes()
+    quote = select_quote(quotes)
+
+    if quote is None:
+        return
+
+    set_pending_quote(quote)
+
+
+def command_daemon() -> None:
+    quotes = load_quotes()
 
     if not quotes:
         return
 
-    quote = random.choice(quotes)
-    set_pending_quote(quote)
+    time.sleep(startup_delay())
+
+    while True:
+        if get_pending_quote() is None:
+            quote = select_quote(quotes)
+
+            if quote is not None:
+                set_pending_quote(quote)
+
+        time.sleep(regular_delay())
 
 
 def main() -> None:
@@ -63,6 +89,7 @@ def main() -> None:
     subparsers.add_parser("now")
     subparsers.add_parser("hook")
     subparsers.add_parser("queue")
+    subparsers.add_parser("daemon")
 
     args = parser.parse_args()
 
@@ -75,6 +102,9 @@ def main() -> None:
 
         case "queue":
             command_queue()
+
+        case "daemon":
+            command_daemon()
 
 
 
