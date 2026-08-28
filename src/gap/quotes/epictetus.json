@@ -1,0 +1,14 @@
+[
+  {
+    "id": "epictetus_test_1",
+    "collection": "epictetus",
+    "author": "Épictète",
+    "text": "Ce qui trouble les hommes, ce ne sont pas les choses, mais les jugements qu'ils portent sur les choses.",
+    "work": "Manuel",
+    "reference": "5",
+    "tags": [
+      "jugement",
+      "trouble"
+    ]
+  }
+]
